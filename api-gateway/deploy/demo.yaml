@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+    annotations:
+    name: api-gateway
+    namespace: api-gateway
+spec:
+    clusterIP: 10.106.224.97
+    clusterIPs:
+    - 10.106.224.97
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+      nodePort: 30080
+    selector:
+      app: api-gateway
+    type: NodePort

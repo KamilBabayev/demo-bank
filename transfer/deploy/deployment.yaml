@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transfer
+  namespace: transfer
+  labels:
+    app: transfer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: transfer
+  template:
+    metadata:
+      labels:
+        app: transfer
+    spec:
+      containers:
+      - name: transfer
+        image: kamilbabayev/demo-bank:transfer
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        env:
+        - name: PORT
+          value: "8080"
+        - name: DB_HOST
+          value: "postgres-transfer.infra.svc.cluster.local"
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_USER
+          value: "transferservice"
+        - name: DB_PASSWORD
+          value: "transferpass"
+        - name: DB_NAME
+          value: "transferdb"
+        - name: KAFKA_BROKERS
+          value: "kafka.infra.svc.cluster.local:9092"

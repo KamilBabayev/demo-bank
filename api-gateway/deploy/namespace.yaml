@@ -1,0 +1,5 @@
+# Namespace for API Gateway
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: api-gateway

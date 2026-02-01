@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment
+  namespace: payment
+  labels:
+    app: payment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment
+  template:
+    metadata:
+      labels:
+        app: payment
+    spec:
+      containers:
+      - name: payment
+        image: kamilbabayev/demo-bank:payment
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        env:
+        - name: PORT
+          value: "8080"
+        - name: DB_HOST
+          value: "postgres-payment.infra.svc.cluster.local"
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_USER
+          value: "paymentservice"
+        - name: DB_PASSWORD
+          value: "paymentpass"
+        - name: DB_NAME
+          value: "paymentdb"
+        - name: KAFKA_BROKERS
+          value: "kafka.infra.svc.cluster.local:9092"

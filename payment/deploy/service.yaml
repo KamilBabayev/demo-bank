@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment
+  namespace: payment
+spec:
+  type: ClusterIP  # Internal only, accessed via API Gateway
+  selector:
+    app: payment
+  ports:
+  - port: 8080
+    targetPort: 8080

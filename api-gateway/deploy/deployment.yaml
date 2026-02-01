@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  namespace: api-gateway
+  labels:
+    app: api-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+      - name: api-gateway
+        image: kamilbabayev/demo-bank:api-gateway
+        imagePullPolicy: Always  # Always pull from Docker Hub
+        ports:
+        - containerPort: 8080
+        env:
+        - name: PORT
+          value: "8080"
+        - name: USER_SERVICE_URL
+          value: "http://user.user.svc.cluster.local:8080"
+        - name: ACCOUNT_SERVICE_URL
+          value: "http://account.account.svc.cluster.local:8080"
+        - name: PAYMENT_SERVICE_URL
+          value: "http://payment.payment.svc.cluster.local:8080"
+        - name: TRANSFER_SERVICE_URL
+          value: "http://transfer.transfer.svc.cluster.local:8080"
+        - name: NOTIFICATION_SERVICE_URL
+          value: "http://notification.notification.svc.cluster.local:8080"
+        - name: JWT_SECRET
+          value: "your-secret-key-change-in-production"

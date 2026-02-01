@@ -1,0 +1,5 @@
+# Namespace for Transfer Service
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: transfer
