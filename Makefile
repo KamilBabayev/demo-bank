@@ -5,7 +5,8 @@ help:
 	@echo "Available commands:"
 	@echo "  make help     - Show this help message"
 	@echo "  make destroy  - Delete Minikube cluster (all profiles)"
-	@echo "  make port-forward - Port-forward api-gateway service to localhost:8080"
+	@echo "  make port-forward-api-gateway - Port-forward api-gateway to localhost:8080"
+	@echo "  make port-forward-frontend    - Port-forward frontend to localhost:8081"
 	@echo "  make start-minikube - Start Minikube cluster"
 	@echo "  make stop-minikube  - Stop Minikube cluster"
 
@@ -17,11 +18,15 @@ destroy:
 	minikube delete
 	@echo "Minikube cluster deleted."	
 	
-.PHONY: port-forward
-port-forward:
-	@echo "Port-forwarding api-gateway service to localhost:8080..."
-	kubectl port-forward -n api-gateway svc/api-gateway 8080:8080 &
-	@echo "Port-forwarding established. Access the API Gateway at http://localhost:8080"
+.PHONY: port-forward-api-gateway
+port-forward-api-gateway:
+	@echo "Port-forwarding api-gateway to localhost:8080 (Ctrl+C to stop)..."
+	kubectl port-forward -n api-gateway svc/api-gateway 8080:8080
+
+.PHONY: port-forward-frontend
+port-forward-frontend:
+	@echo "Port-forwarding frontend to localhost:8081 (Ctrl+C to stop)..."
+	kubectl port-forward -n frontend svc/frontend 8081:80
 
 .PHONY: start-minikube
 start-minikube:
