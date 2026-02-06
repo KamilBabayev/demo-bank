@@ -1,0 +1,31 @@
+# Compiled binaries
+account/account
+card/card
+notification/notification
+payment/payment
+transfer/transfer
+user/user
+api-gateway/api-gateway
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+dist/
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out

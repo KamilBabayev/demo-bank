@@ -262,6 +262,20 @@ func (app *App) updateUser(c *gin.Context) {
 		return
 	}
 
+	// Hash password if provided
+	if req.Password != nil && *req.Password != "" {
+		passwordHash, err := bcrypt.GenerateFromPassword([]byte(*req.Password), bcrypt.DefaultCost)
+		if err != nil {
+			log.Printf("Error hashing password: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": "Failed to process password",
+			})
+			return
+		}
+		hashedStr := string(passwordHash)
+		req.Password = &hashedStr
+	}
+
 	user, err := app.repo.Update(ctx, id, &req)
 	if err != nil {
 		if err == repository.ErrUserNotFound {

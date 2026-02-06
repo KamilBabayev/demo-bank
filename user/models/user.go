@@ -36,6 +36,7 @@ type UpdateUserRequest struct {
 	LastName  *string `json:"last_name,omitempty"`
 	Phone     *string `json:"phone,omitempty"`
 	Status    *string `json:"status,omitempty" binding:"omitempty,oneof=active suspended closed"`
+	Password  *string `json:"password,omitempty" binding:"omitempty,min=8"`
 }
 
 type UserListResponse struct {

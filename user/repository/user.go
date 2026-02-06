@@ -179,7 +179,7 @@ Total: total,
 func (r *UserRepository) Update(ctx context.Context, id int64, req *models.UpdateUserRequest) (*models.User, error) {
 query := `UPDATE users SET updated_at = NOW()`
 args := []interface{}{}
-argCount := 1
+argCount := 0
 
 if req.FirstName != nil {
 argCount++
@@ -203,6 +203,12 @@ if req.Status != nil {
 argCount++
 query += fmt.Sprintf(`, status = $%d`, argCount)
 args = append(args, *req.Status)
+}
+
+if req.Password != nil {
+argCount++
+query += fmt.Sprintf(`, password_hash = $%d`, argCount)
+args = append(args, *req.Password) // Expects pre-hashed password
 }
 
 argCount++

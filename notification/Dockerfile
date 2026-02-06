@@ -1,26 +1,29 @@
 # Build stage
-FROM --platform=linux/arm64 golang:1.23-alpine AS builder
+FROM golang:1.23-alpine AS builder
+
 WORKDIR /app
 
-# RUN chmod +x notification
+# Copy go mod and all source files
+COPY go.mod ./
+COPY go.sum* ./
+COPY . .
 
-COPY go.mod go.sum ./
-RUN go mod download
-
-COPY *.go ./
-
-# Explicitly set target OS/arch
-# RUN CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o notification .
-RUN go build -o notification .
+# Download dependencies and build
+RUN go mod tidy && go mod download
+RUN CGO_ENABLED=0 GOOS=linux go build -o notification .
 
 # Final stage
-FROM --platform=linux/arm64 alpine:latest
+FROM alpine:latest
+
+RUN apk --no-cache add ca-certificates
+
 WORKDIR /app
 
+# Copy binary and migrations from builder
 COPY --from=builder /app/notification .
+COPY --from=builder /app/migrations ./migrations
 
+# Expose port
 EXPOSE 8080
-
-# RUN chmod +x notification
 
 CMD ["./notification"]

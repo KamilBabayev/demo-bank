@@ -62,6 +62,9 @@ func main() {
 	protected := router.Group("/api/v1")
 	protected.Use(authMiddleware())
 	{
+		// Admin-only status endpoint
+		protected.GET("/admin/status", adminOnly(), handleStatus)
+
 		// Proxy to User Service
 		protected.Any("/users", proxyToUserService)
 		protected.Any("/users/*path", proxyToUserService)
@@ -81,6 +84,10 @@ func main() {
 		// Proxy to Notification Service
 		protected.Any("/notifications", proxyToNotificationService)
 		protected.Any("/notifications/*path", proxyToNotificationService)
+
+		// Proxy to Card Service
+		protected.Any("/cards", proxyToCardService)
+		protected.Any("/cards/*path", proxyToCardService)
 	}
 
 	// Get port from environment or use default
@@ -253,6 +260,11 @@ func proxyToNotificationService(c *gin.Context) {
 	proxyRequest(c, notificationServiceURL, "/api/v1/notifications", "/api/notifications")
 }
 
+func proxyToCardService(c *gin.Context) {
+	cardServiceURL := getEnv("CARD_SERVICE_URL", "http://card.card.svc.cluster.local:8080")
+	proxyRequest(c, cardServiceURL, "/api/v1/cards", "/api/cards")
+}
+
 // proxyRequest forwards the request to the target service with user context headers
 func proxyRequest(c *gin.Context, targetURL, stripPrefix, addPrefix string) {
 	target, err := url.Parse(targetURL)
@@ -317,4 +329,169 @@ func getEnv(key, defaultValue string) string {
 		return value
 	}
 	return defaultValue
+}
+
+// adminOnly middleware restricts access to admin users
+func adminOnly() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		role, exists := c.Get("user_role")
+		if !exists || role != "admin" {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
+				"error": "Admin access required",
+			})
+			return
+		}
+		c.Next()
+	}
+}
+
+// ServiceStatus represents the health status of a service
+type ServiceStatus struct {
+	Name         string `json:"name"`
+	Status       string `json:"status"` // "up" or "down"
+	ResponseTime int64  `json:"response_time_ms"`
+	Error        string `json:"error,omitempty"`
+}
+
+// ConnectionStatus represents a connection between components
+type ConnectionStatus struct {
+	From         string `json:"from"`
+	To           string `json:"to"`
+	Status       string `json:"status"` // "connected" or "disconnected"
+	ResponseTime int64  `json:"response_time_ms"`
+	Error        string `json:"error,omitempty"`
+}
+
+// SystemStatus represents the full system status
+type SystemStatus struct {
+	Services    []ServiceStatus    `json:"services"`
+	Connections []ConnectionStatus `json:"connections"`
+	Timestamp   string             `json:"timestamp"`
+}
+
+// checkServiceHealth pings a service's health endpoint
+func checkServiceHealth(name, url string) ServiceStatus {
+	status := ServiceStatus{Name: name, Status: "down"}
+
+	client := &http.Client{Timeout: 5 * time.Second}
+	start := time.Now()
+
+	resp, err := client.Get(url + "/health")
+	status.ResponseTime = time.Since(start).Milliseconds()
+
+	if err != nil {
+		status.Error = err.Error()
+		return status
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusOK {
+		status.Status = "up"
+	} else {
+		status.Error = "unhealthy response: " + resp.Status
+	}
+
+	return status
+}
+
+// handleStatus returns the status of all services and connections
+func handleStatus(c *gin.Context) {
+	// Service URLs
+	services := map[string]string{
+		"user":         getEnv("USER_SERVICE_URL", "http://user.user.svc.cluster.local:8080"),
+		"account":      getEnv("ACCOUNT_SERVICE_URL", "http://account.account.svc.cluster.local:8080"),
+		"transfer":     getEnv("TRANSFER_SERVICE_URL", "http://transfer.transfer.svc.cluster.local:8080"),
+		"payment":      getEnv("PAYMENT_SERVICE_URL", "http://payment.payment.svc.cluster.local:8080"),
+		"notification": getEnv("NOTIFICATION_SERVICE_URL", "http://notification.notification.svc.cluster.local:8080"),
+		"card":         getEnv("CARD_SERVICE_URL", "http://card.card.svc.cluster.local:8080"),
+	}
+
+	// Check all services in parallel
+	statusChan := make(chan ServiceStatus, len(services))
+	for name, url := range services {
+		go func(n, u string) {
+			statusChan <- checkServiceHealth(n, u)
+		}(name, url)
+	}
+
+	// Collect results
+	var serviceStatuses []ServiceStatus
+	for i := 0; i < len(services); i++ {
+		serviceStatuses = append(serviceStatuses, <-statusChan)
+	}
+
+	// Build connections list
+	var connections []ConnectionStatus
+
+	// API Gateway to services
+	for _, svc := range serviceStatuses {
+		conn := ConnectionStatus{
+			From:         "api-gateway",
+			To:           svc.Name,
+			Status:       "disconnected",
+			ResponseTime: svc.ResponseTime,
+		}
+		if svc.Status == "up" {
+			conn.Status = "connected"
+		} else {
+			conn.Error = svc.Error
+		}
+		connections = append(connections, conn)
+	}
+
+	// Services to their databases (inferred from service health)
+	dbServices := []string{"user", "account", "transfer", "payment", "notification", "card"}
+	for _, svcName := range dbServices {
+		for _, svc := range serviceStatuses {
+			if svc.Name == svcName {
+				conn := ConnectionStatus{
+					From:         svcName,
+					To:           svcName + "-db",
+					Status:       "disconnected",
+					ResponseTime: 0,
+				}
+				// If service is up, assume DB is connected (health check includes DB)
+				if svc.Status == "up" {
+					conn.Status = "connected"
+				}
+				connections = append(connections, conn)
+				break
+			}
+		}
+	}
+
+	// Kafka connections (for services that use it)
+	kafkaServices := []string{"transfer", "payment", "notification", "account", "card"}
+	for _, svcName := range kafkaServices {
+		for _, svc := range serviceStatuses {
+			if svc.Name == svcName {
+				conn := ConnectionStatus{
+					From:   svcName,
+					To:     "kafka",
+					Status: "disconnected",
+				}
+				if svc.Status == "up" {
+					conn.Status = "connected"
+				}
+				connections = append(connections, conn)
+				break
+			}
+		}
+	}
+
+	// Frontend to API Gateway (always connected if this request succeeded)
+	connections = append(connections, ConnectionStatus{
+		From:         "frontend",
+		To:           "api-gateway",
+		Status:       "connected",
+		ResponseTime: 0,
+	})
+
+	status := SystemStatus{
+		Services:    serviceStatuses,
+		Connections: connections,
+		Timestamp:   time.Now().Format(time.RFC3339),
+	}
+
+	c.JSON(http.StatusOK, status)
 }

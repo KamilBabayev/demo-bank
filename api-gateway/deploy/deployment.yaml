@@ -34,5 +34,7 @@ spec:
           value: "http://transfer.transfer.svc.cluster.local:8080"
         - name: NOTIFICATION_SERVICE_URL
           value: "http://notification.notification.svc.cluster.local:8080"
+        - name: CARD_SERVICE_URL
+          value: "http://card.card.svc.cluster.local:8080"
         - name: JWT_SECRET
           value: "your-secret-key-change-in-production"

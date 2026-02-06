@@ -34,5 +34,5 @@ spec:
           value: "notification123"
         - name: DB_NAME
           value: "notificationdb"
-        - name: KAFKA_BROKER
+        - name: KAFKA_BROKERS
           value: "kafka.infra.svc.cluster.local:9092"

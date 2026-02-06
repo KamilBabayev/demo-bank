@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: card
+  namespace: card
+  labels:
+    app: card
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: card
+  template:
+    metadata:
+      labels:
+        app: card
+    spec:
+      containers:
+      - name: card
+        image: kamilbabayev/demo-bank:card
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        env:
+        - name: PORT
+          value: "8080"
+        - name: DB_HOST
+          value: "postgres-card.infra.svc.cluster.local"
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_USER
+          value: "cardservice"
+        - name: DB_PASSWORD
+          value: "cardpass"
+        - name: DB_NAME
+          value: "carddb"
+        - name: KAFKA_BROKERS
+          value: "kafka.infra.svc.cluster.local:9092"
+        - name: ACCOUNT_SERVICE_URL
+          value: "http://account.account.svc.cluster.local:8080"
+        - name: JWT_SECRET
+          value: "your-secret-key-change-in-production"
