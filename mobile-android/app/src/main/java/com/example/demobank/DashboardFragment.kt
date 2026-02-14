@@ -1,6 +1,7 @@
 package com.example.demobank
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -12,29 +13,21 @@ import androidx.recyclerview.widget.RecyclerView
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
 class DashboardFragment : Fragment() {
 
     private lateinit var welcomeMessage: TextView
     private lateinit var totalBalance: TextView
     private lateinit var accountsRecyclerView: RecyclerView
-    private lateinit var apiService: ApiService
     private var token: String? = null
+    private var username: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
             token = it.getString("TOKEN")
+            username = it.getString("USERNAME")
         }
-
-        val retrofit = Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8080") // Use 10.0.2.2 for localhost from Android emulator
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        apiService = retrofit.create(ApiService::class.java)
     }
 
     override fun onCreateView(
@@ -47,24 +40,29 @@ class DashboardFragment : Fragment() {
         accountsRecyclerView = view.findViewById(R.id.accounts_recycler_view)
         accountsRecyclerView.layoutManager = LinearLayoutManager(context)
 
+        welcomeMessage.text = "Welcome, $username"
+
+        return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         if (token != null) {
             fetchDashboardData()
         } else {
             Toast.makeText(context, "Authentication token not found", Toast.LENGTH_SHORT).show()
         }
-
-        return view
     }
 
     private fun fetchDashboardData() {
         token?.let {
-            apiService.getAccounts("Bearer $it").enqueue(object : Callback<List<Account>> {
-                override fun onResponse(call: Call<List<Account>>, response: Response<List<Account>>) {
+            DataRepository.getAccounts(it).enqueue(object : Callback<AccountResponse> {
+                override fun onResponse(call: Call<AccountResponse>, response: Response<AccountResponse>) {
                     if (response.isSuccessful) {
-                        val accounts = response.body()
-                        if (accounts != null) {
-                            accountsRecyclerView.adapter = AccountAdapter(accounts)
-                            val total = accounts.sumOf { it.balance }
+                        val accountResponse = response.body()
+                        if (accountResponse != null) {
+                            accountsRecyclerView.adapter = AccountAdapter(accountResponse.accounts)
+                            val total = accountResponse.accounts.sumOf { it.balance.toDouble() }
                             totalBalance.text = "$${String.format("%,.2f", total)}"
                         } else {
                             Toast.makeText(context, "No accounts found", Toast.LENGTH_SHORT).show()
@@ -74,7 +72,8 @@ class DashboardFragment : Fragment() {
                     }
                 }
 
-                override fun onFailure(call: Call<List<Account>>, t: Throwable) {
+                override fun onFailure(call: Call<AccountResponse>, t: Throwable) {
+                    Log.e("DashboardFragment", "Failed to fetch accounts", t)
                     Toast.makeText(context, "Failed to fetch accounts: " + t.message, Toast.LENGTH_SHORT).show()
                 }
             })

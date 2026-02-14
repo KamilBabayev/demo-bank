@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns1="http://schemas.android.com/tools">
+    <color name="background_dark">#111827</color>
+    <color name="black">#FF000000</color>
+    <color name="card_background_dark">#1F2937</color>
+    <color name="gold_accent">#F59E0B</color>
+    <color name="gold_accent_dark">#D97706</color>
+    <color name="ic_launcher_background">#111827</color>
+    <color name="text_grey">#9CA3AF</color>
+    <color name="text_white">#FFFFFF</color>
+    <color name="white">#FFFFFFFF</color>
+    <string name="app_name">demobank</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <style name="Theme.Demobank" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        
+        <item name="colorPrimary">@color/gold_accent</item>
+        <item name="colorPrimaryVariant">@color/gold_accent_dark</item>
+        <item name="colorOnPrimary">@color/text_white</item>
+        
+        <item name="colorSecondary">@color/gold_accent</item>
+        <item name="colorOnSecondary">@color/black</item>
+        
+        <item name="android:statusBarColor" ns1:targetApi="l">?attr/colorPrimaryVariant</item>
+        
+        <item name="android:windowBackground">@color/background_dark</item>
+        <item name="android:textColor">@color/text_white</item>
+    </style>
+</resources>

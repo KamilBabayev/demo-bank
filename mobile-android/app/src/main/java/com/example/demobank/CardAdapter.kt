@@ -6,12 +6,6 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-data class Card(
-    val card_number: String,
-    val expiration_date: String,
-    val cardholder_name: String
-)
-
 class CardAdapter(private val cards: List<Card>) : RecyclerView.Adapter<CardAdapter.CardViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CardViewHolder {
@@ -22,7 +16,7 @@ class CardAdapter(private val cards: List<Card>) : RecyclerView.Adapter<CardAdap
     override fun onBindViewHolder(holder: CardViewHolder, position: Int) {
         val card = cards[position]
         holder.cardNumber.text = card.card_number
-        holder.cardExpiration.text = card.expiration_date
+        holder.cardExpiration.text = "${card.expiration_month}/${card.expiration_year}"
         holder.cardHolder.text = card.cardholder_name
     }
 

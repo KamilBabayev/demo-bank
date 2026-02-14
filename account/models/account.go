@@ -91,3 +91,26 @@ type TransferResultEvent struct {
 	FromUserID    int64  `json:"from_user_id,omitempty"`
 	ToUserID      int64  `json:"to_user_id,omitempty"`
 }
+
+// PaymentEvent represents a Kafka event for payments
+type PaymentEvent struct {
+	PaymentID        int64           `json:"payment_id"`
+	ReferenceID      string          `json:"reference_id"`
+	AccountID        int64           `json:"account_id"`
+	UserID           int64           `json:"user_id"`
+	PaymentType      string          `json:"payment_type"`
+	RecipientName    string          `json:"recipient_name,omitempty"`
+	RecipientAccount string          `json:"recipient_account,omitempty"`
+	Amount           decimal.Decimal `json:"amount"`
+	Currency         string          `json:"currency"`
+}
+
+// PaymentResultEvent represents the result of a payment
+type PaymentResultEvent struct {
+	PaymentID     int64  `json:"payment_id"`
+	ReferenceID   string `json:"reference_id"`
+	Status        string `json:"status"` // "completed" or "failed"
+	FailureReason string `json:"failure_reason,omitempty"`
+	AccountID     int64  `json:"account_id,omitempty"`
+	UserID        int64  `json:"user_id,omitempty"`
+}

@@ -17,23 +17,9 @@ class MoreFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_more, container, false)
 
-        val accountsButton = view.findViewById<TextView>(R.id.accounts_button)
-        accountsButton.setOnClickListener {
-            val fragment = AccountsFragment()
-            fragment.arguments = arguments
-            parentFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit()
-        }
-
-        val cardsButton = view.findViewById<TextView>(R.id.cards_button)
-        cardsButton.setOnClickListener {
-            val fragment = CardsFragment()
-            fragment.arguments = arguments
-            parentFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit()
-        }
-
-        val paymentsButton = view.findViewById<TextView>(R.id.payments_button)
-        paymentsButton.setOnClickListener {
-            val fragment = PaymentsFragment()
+        val notificationsButton = view.findViewById<TextView>(R.id.notifications_button)
+        notificationsButton.setOnClickListener {
+            val fragment = NotificationsFragment()
             fragment.arguments = arguments
             parentFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit()
         }

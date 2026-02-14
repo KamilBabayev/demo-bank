@@ -1,0 +1,174 @@
+[
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/layout_fragment_notifications.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/layout/fragment_notifications.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/layout_activity_home.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/layout/activity_home.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/drawable_ic_history.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/drawable/ic_history.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/layout_item_account.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/layout/item_account.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/layout_item_transfer.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/layout/item_transfer.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/layout_fragment_cards.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/layout/fragment_cards.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/menu_toolbar_menu.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/menu/toolbar_menu.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/menu_bottom_nav_menu.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/menu/bottom_nav_menu.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/layout_fragment_more.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/layout/fragment_more.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/drawable_ic_transfers.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/drawable/ic_transfers.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/menu_new_transfer_menu.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/menu/new_transfer_menu.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/mipmap-xxxhdpi_ic_launcher_foreground.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/mipmap-xxxhdpi/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/layout_item_card.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/layout/item_card.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/layout_fragment_payments.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/layout/fragment_payments.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/layout_item_account_spinner.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/layout/item_account_spinner.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/xml_data_extraction_rules.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/xml/data_extraction_rules.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/layout_fragment_accounts.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/layout/fragment_accounts.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/drawable_ic_status.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/drawable/ic_status.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/drawable_ic_logout.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/drawable/ic_logout.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/drawable_ic_more.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/drawable/ic_more.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/drawable_ic_dashboard.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/drawable/ic_dashboard.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/layout_fragment_transfers.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/layout/fragment_transfers.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/layout_activity_new_transfer.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/layout/activity_new_transfer.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/layout_item_notification.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/layout/item_notification.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/layout_fragment_dashboard.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/layout/fragment_dashboard.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/drawable_ic_add.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/drawable/ic_add.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/drawable_ic_users.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/drawable/ic_users.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/layout_nav_header.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/layout/nav_header.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/drawable_ic_launcher_background.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/drawable/ic_launcher_background.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/drawable_ic_notifications.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/drawable/ic_notifications.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/drawable_edit_text_background.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/drawable/edit_text_background.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/layout_item_payment.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/layout/item_payment.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/menu_drawer_menu.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/menu/drawer_menu.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/drawable_ic_accounts.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/drawable/ic_accounts.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/drawable_ic_cards.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/drawable/ic_cards.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/xml_backup_rules.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/xml/backup_rules.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/layout_activity_main.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/layout/activity_main.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/drawable_ic_menu.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/drawable/ic_menu.xml"
+    },
+    {
+        "merged": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-merged_res-31:/drawable_ic_payments.xml.flat",
+        "source": "/Users/kamil/.gradle/daemon/9.0-milestone-1/com.example.demobank.app-main-33:/drawable/ic_payments.xml"
+    },
+    {
+        "merged": "com.example.demobank.app-merged_res-31:/menu_bottom_nav_menu.xml.flat",
+        "source": "com.example.demobank.app-main-33:/menu/bottom_nav_menu.xml"
+    }
+]

@@ -13,8 +13,10 @@ import (
 )
 
 type Producer struct {
-	completedWriter *kafka.Writer
-	failedWriter    *kafka.Writer
+	completedWriter        *kafka.Writer
+	failedWriter           *kafka.Writer
+	paymentCompletedWriter *kafka.Writer
+	paymentFailedWriter    *kafka.Writer
 }
 
 func NewProducer(brokers []string) *Producer {
@@ -36,9 +38,29 @@ func NewProducer(brokers []string) *Producer {
 		Async:        false,
 	}
 
+	paymentCompletedWriter := &kafka.Writer{
+		Addr:         kafka.TCP(brokers...),
+		Topic:        TopicPaymentCompleted,
+		Balancer:     &kafka.LeastBytes{},
+		BatchTimeout: 10 * time.Millisecond,
+		RequiredAcks: kafka.RequireAll,
+		Async:        false,
+	}
+
+	paymentFailedWriter := &kafka.Writer{
+		Addr:         kafka.TCP(brokers...),
+		Topic:        TopicPaymentFailed,
+		Balancer:     &kafka.LeastBytes{},
+		BatchTimeout: 10 * time.Millisecond,
+		RequiredAcks: kafka.RequireAll,
+		Async:        false,
+	}
+
 	return &Producer{
-		completedWriter: completedWriter,
-		failedWriter:    failedWriter,
+		completedWriter:        completedWriter,
+		failedWriter:           failedWriter,
+		paymentCompletedWriter: paymentCompletedWriter,
+		paymentFailedWriter:    paymentFailedWriter,
 	}
 }
 
@@ -90,12 +112,66 @@ func (p *Producer) PublishTransferFailed(ctx context.Context, event models.Trans
 	return nil
 }
 
-// Close closes both writers
+// PublishPaymentCompleted publishes a payment completed event
+func (p *Producer) PublishPaymentCompleted(ctx context.Context, event models.PaymentResultEvent) error {
+	value, err := json.Marshal(event)
+	if err != nil {
+		return fmt.Errorf("failed to marshal event: %w", err)
+	}
+
+	msg := kafka.Message{
+		Key:   []byte(event.ReferenceID),
+		Value: value,
+		Headers: []kafka.Header{
+			{Key: "event_type", Value: []byte("payment.completed")},
+			{Key: "payment_id", Value: []byte(fmt.Sprintf("%d", event.PaymentID))},
+		},
+	}
+
+	if err := p.paymentCompletedWriter.WriteMessages(ctx, msg); err != nil {
+		return fmt.Errorf("failed to publish event: %w", err)
+	}
+
+	log.Printf("Published payment.completed event for payment %d", event.PaymentID)
+	return nil
+}
+
+// PublishPaymentFailed publishes a payment failed event
+func (p *Producer) PublishPaymentFailed(ctx context.Context, event models.PaymentResultEvent) error {
+	value, err := json.Marshal(event)
+	if err != nil {
+		return fmt.Errorf("failed to marshal event: %w", err)
+	}
+
+	msg := kafka.Message{
+		Key:   []byte(event.ReferenceID),
+		Value: value,
+		Headers: []kafka.Header{
+			{Key: "event_type", Value: []byte("payment.failed")},
+			{Key: "payment_id", Value: []byte(fmt.Sprintf("%d", event.PaymentID))},
+		},
+	}
+
+	if err := p.paymentFailedWriter.WriteMessages(ctx, msg); err != nil {
+		return fmt.Errorf("failed to publish event: %w", err)
+	}
+
+	log.Printf("Published payment.failed event for payment %d: %s", event.PaymentID, event.FailureReason)
+	return nil
+}
+
+// Close closes all writers
 func (p *Producer) Close() error {
 	if err := p.completedWriter.Close(); err != nil {
 		return err
 	}
-	return p.failedWriter.Close()
+	if err := p.failedWriter.Close(); err != nil {
+		return err
+	}
+	if err := p.paymentCompletedWriter.Close(); err != nil {
+		return err
+	}
+	return p.paymentFailedWriter.Close()
 }
 
 // EnsureTopicExists creates the topic if it doesn't exist
