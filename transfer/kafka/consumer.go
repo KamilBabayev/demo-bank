@@ -19,10 +19,10 @@ const (
 type Consumer struct {
 	completedReader *kafka.Reader
 	failedReader    *kafka.Reader
-	repo            *repository.TransferRepository
+	repo            repository.TransferRepo
 }
 
-func NewConsumer(brokers []string, groupID string, repo *repository.TransferRepository) *Consumer {
+func NewConsumer(brokers []string, groupID string, repo repository.TransferRepo) *Consumer {
 	completedReader := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:     brokers,
 		Topic:       TopicTransferCompleted,

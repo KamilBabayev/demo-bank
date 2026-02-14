@@ -14,15 +14,28 @@
         android:padding="16dp">
 
         <TextView
-            android:id="@+id/notification_message"
+            android:id="@+id/notification_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:textColor="@color/text_white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Payment Processed" />
+
+        <TextView
+            android:id="@+id/notification_content"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:textColor="@color/text_white"
             android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="Your transfer of $200.00 to account ...1234 has been completed." />
+            app:layout_constraintTop_toBottomOf="@id/notification_title"
+            tools:text="Your payment (ref: 1eaba205-4951-4390-a16c-bfb935d82a24) has been processed successfully." />
 
         <TextView
             android:id="@+id/notification_date"
@@ -32,7 +45,7 @@
             android:textColor="@color/text_grey"
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/notification_message"
+            app:layout_constraintTop_toBottomOf="@id/notification_content"
             tools:text="2024-07-16" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

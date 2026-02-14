@@ -38,5 +38,7 @@ spec:
           value: "kafka.infra.svc.cluster.local:9092"
         - name: ACCOUNT_SERVICE_URL
           value: "http://account.account.svc.cluster.local:8080"
+        - name: REDIS_URL
+          value: "redis://redis.redis.svc.cluster.local:6379"
         - name: JWT_SECRET
           value: "your-secret-key-change-in-production"

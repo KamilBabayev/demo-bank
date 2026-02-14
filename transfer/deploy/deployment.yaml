@@ -36,3 +36,5 @@ spec:
           value: "transferdb"
         - name: KAFKA_BROKERS
           value: "kafka.infra.svc.cluster.local:9092"
+        - name: REDIS_URL
+          value: "redis://redis.redis.svc.cluster.local:6379"

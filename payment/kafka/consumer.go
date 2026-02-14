@@ -14,10 +14,10 @@ import (
 type Consumer struct {
 	completedReader *kafka.Reader
 	failedReader    *kafka.Reader
-	repo            *repository.PaymentRepository
+	repo            repository.PaymentRepo
 }
 
-func NewConsumer(brokers []string, groupID string, repo *repository.PaymentRepository) *Consumer {
+func NewConsumer(brokers []string, groupID string, repo repository.PaymentRepo) *Consumer {
 	completedReader := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:     brokers,
 		Topic:       TopicPaymentCompleted,

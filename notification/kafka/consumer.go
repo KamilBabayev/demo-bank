@@ -24,12 +24,12 @@ type Consumer struct {
 	transferFailedReader    *kafka.Reader
 	paymentCompletedReader  *kafka.Reader
 	paymentFailedReader     *kafka.Reader
-	repo                    *repository.NotificationRepository
+	repo                    repository.NotificationRepo
 	// In a real system, we would have a user lookup service
 	// For now, we'll simulate with placeholder user IDs
 }
 
-func NewConsumer(brokers []string, groupID string, repo *repository.NotificationRepository) *Consumer {
+func NewConsumer(brokers []string, groupID string, repo repository.NotificationRepo) *Consumer {
 	transferCompletedReader := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:     brokers,
 		Topic:       TopicTransferCompleted,

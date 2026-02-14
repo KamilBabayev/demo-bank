@@ -1,28 +1,35 @@
 package com.example.demobank
 
+import android.os.Parcelable
+import com.google.gson.annotations.SerializedName
+import kotlinx.parcelize.Parcelize
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
 
+@Parcelize
 data class LoginRequest(
     val username: String,
     val password: String
-)
+) : Parcelable
 
+@Parcelize
 data class User(
     val id: Long,
     val username: String,
     val role: String
-)
+) : Parcelable
 
+@Parcelize
 data class LoginResponse(
     val token: String,
     val expires_at: String,
     val user: User
-)
+) : Parcelable
 
+@Parcelize
 data class Account(
     val id: Long,
     val user_id: Long,
@@ -33,8 +40,9 @@ data class Account(
     val status: String,
     val created_at: String,
     val updated_at: String
-)
+) : Parcelable
 
+@Parcelize
 data class Card(
     val id: Long,
     val account_id: Long,
@@ -51,16 +59,18 @@ data class Card(
     val monthly_used: String,
     val created_at: String,
     val updated_at: String
-)
+) : Parcelable
 
+@Parcelize
 data class Payment(
     val id: Long,
     val account_id: Long,
-    val amount: String,
+    val amount: Double,
     val recipient: String,
     val date: String
-)
+) : Parcelable
 
+@Parcelize
 data class Transfer(
     val id: Long,
     val reference_id: String,
@@ -72,19 +82,35 @@ data class Transfer(
     val created_at: String,
     val updated_at: String,
     val completed_at: String
-)
+) : Parcelable
 
+@Parcelize
 data class NewTransferRequest(
     val from_account_id: Long,
     val to_account_id: Long,
     val amount: Double
-)
+) : Parcelable
 
+@Parcelize
 data class Notification(
     val id: Long,
-    val message: String,
-    val date: String
-)
+    val user_id: Long,
+    val type: String,
+    val channel: String,
+    val title: String,
+    val content: String,
+    val metadata: NotificationMetadata,
+    val status: String,
+    @SerializedName("created_at") val createdAt: String
+) : Parcelable
+
+@Parcelize
+data class NotificationMetadata(
+    val payment_id: Long?,
+    val transfer_id: Long?,
+    val reference_id: String?,
+    val failure_reason: String?
+) : Parcelable
 
 interface ApiService {
     @POST("/api/v1/auth/login")

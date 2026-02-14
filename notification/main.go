@@ -11,6 +11,7 @@ import (
 	"strings"
 	"syscall"
 
+	"notification-service/cache"
 	"notification-service/db"
 	"notification-service/kafka"
 	"notification-service/models"
@@ -21,11 +22,13 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 )
 
 var (
 	dbPool           *pgxpool.Pool
-	notificationRepo *repository.NotificationRepository
+	redisClient      *redis.Client
+	notificationRepo repository.NotificationRepo
 	kafkaConsumer    *kafka.Consumer
 )
 
@@ -62,7 +65,14 @@ func main() {
 	log.Println("Database migrations completed")
 
 	// Initialize repository
-	notificationRepo = repository.NewNotificationRepository(dbPool)
+	baseRepo := repository.NewNotificationRepository(dbPool)
+
+	// Initialize Redis cache
+	redisURL := getEnv("REDIS_URL", "redis://localhost:6379")
+	redisClient = cache.NewRedisClient(redisURL)
+	defer redisClient.Close()
+
+	notificationRepo = cache.NewCachedNotificationRepository(baseRepo, redisClient)
 
 	// Initialize Kafka
 	kafkaBrokers := strings.Split(getEnv("KAFKA_BROKERS", "localhost:9092"), ",")
@@ -123,10 +133,16 @@ func healthCheck(c *gin.Context) {
 		dbStatus = "disconnected"
 	}
 
+	redisStatus := "connected"
+	if err := cache.HealthCheck(c.Request.Context(), redisClient); err != nil {
+		redisStatus = "disconnected"
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"status":   "healthy",
 		"service":  "notification",
 		"database": dbStatus,
+		"redis":    redisStatus,
 	})
 }
 

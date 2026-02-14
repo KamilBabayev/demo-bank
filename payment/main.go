@@ -11,6 +11,7 @@ import (
 	"strings"
 	"syscall"
 
+	"payment/cache"
 	"payment/db"
 	"payment/kafka"
 	"payment/models"
@@ -21,12 +22,14 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 	"github.com/shopspring/decimal"
 )
 
 var (
 	dbPool        *pgxpool.Pool
-	paymentRepo   *repository.PaymentRepository
+	redisClient   *redis.Client
+	paymentRepo   repository.PaymentRepo
 	kafkaProducer *kafka.Producer
 	kafkaConsumer *kafka.Consumer
 )
@@ -64,7 +67,14 @@ func main() {
 	log.Println("Database migrations completed")
 
 	// Initialize repository
-	paymentRepo = repository.NewPaymentRepository(dbPool)
+	baseRepo := repository.NewPaymentRepository(dbPool)
+
+	// Initialize Redis cache
+	redisURL := getEnv("REDIS_URL", "redis://localhost:6379")
+	redisClient = cache.NewRedisClient(redisURL)
+	defer redisClient.Close()
+
+	paymentRepo = cache.NewCachedPaymentRepository(baseRepo, redisClient)
 
 	// Initialize Kafka
 	kafkaBrokers := strings.Split(getEnv("KAFKA_BROKERS", "localhost:9092"), ",")
@@ -126,10 +136,16 @@ func healthCheck(c *gin.Context) {
 		dbStatus = "disconnected"
 	}
 
+	redisStatus := "connected"
+	if err := cache.HealthCheck(c.Request.Context(), redisClient); err != nil {
+		redisStatus = "disconnected"
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"status":   "healthy",
 		"service":  "payment",
 		"database": dbStatus,
+		"redis":    redisStatus,
 	})
 }
 

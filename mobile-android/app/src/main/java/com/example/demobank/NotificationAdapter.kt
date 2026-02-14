@@ -1,5 +1,6 @@
 package com.example.demobank
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,8 +18,17 @@ class NotificationAdapter(private val notifications: List<Notification>) : Recyc
 
     override fun onBindViewHolder(holder: NotificationViewHolder, position: Int) {
         val notification = notifications[position]
-        holder.notificationMessage.text = notification.message
-        holder.notificationDate.text = formatDate(notification.date)
+        holder.notificationTitle.text = notification.title
+        holder.notificationContent.text = notification.content
+        holder.notificationDate.text = formatDate(notification.createdAt)
+
+        holder.itemView.setOnClickListener {
+            val context = holder.itemView.context
+            val intent = Intent(context, NotificationDetailActivity::class.java).apply {
+                putExtra("NOTIFICATION", notification)
+            }
+            context.startActivity(intent)
+        }
     }
 
     override fun getItemCount() = notifications.size
@@ -35,7 +45,8 @@ class NotificationAdapter(private val notifications: List<Notification>) : Recyc
     }
 
     class NotificationViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val notificationMessage: TextView = itemView.findViewById(R.id.notification_message)
+        val notificationTitle: TextView = itemView.findViewById(R.id.notification_title)
+        val notificationContent: TextView = itemView.findViewById(R.id.notification_content)
         val notificationDate: TextView = itemView.findViewById(R.id.notification_date)
     }
 }
