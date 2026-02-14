@@ -1,0 +1,22 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_dashboard"
+        android:icon="@drawable/ic_dashboard"
+        android:title="Dashboard" />
+    <item
+        android:id="@+id/navigation_accounts"
+        android:icon="@drawable/ic_accounts"
+        android:title="Accounts" />
+    <item
+        android:id="@+id/navigation_cards"
+        android:icon="@drawable/ic_cards"
+        android:title="Cards" />
+    <item
+        android:id="@+id/navigation_payments"
+        android:icon="@drawable/ic_payments"
+        android:title="Payments" />
+    <item
+        android:id="@+id/navigation_transfers"
+        android:icon="@drawable/ic_transfers"
+        android:title="Transfers" />
+</menu>

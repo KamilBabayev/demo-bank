@@ -36,5 +36,7 @@ spec:
           value: "accountdb"
         - name: KAFKA_BROKERS
           value: "kafka.infra.svc.cluster.local:9092"
+        - name: REDIS_URL
+          value: "redis://redis.redis.svc.cluster.local:6379"
         - name: JWT_SECRET
           value: "your-secret-key-change-in-production"

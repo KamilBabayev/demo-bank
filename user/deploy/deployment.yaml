@@ -37,6 +37,8 @@ spec:
               key: DB_PASSWORD
         - name: DB_NAME
           value: "userdb"
+        - name: REDIS_URL
+          value: "redis://redis.redis.svc.cluster.local:6379"
         - name: JWT_SECRET
           valueFrom:
             secretKeyRef:

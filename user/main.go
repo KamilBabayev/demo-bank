@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"user-service/cache"
 	"user-service/db"
 	"user-service/models"
 	"user-service/repository"
@@ -19,11 +20,14 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/redis/go-redis/v9"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type App struct {
-	repo *repository.UserRepository
+	repo        *repository.UserRepository
+	cachedRepo  *cache.CachedUserRepository
+	redisClient *redis.Client
 }
 
 func main() {
@@ -52,26 +56,44 @@ func main() {
 
 	// Initialize repository
 	userRepo := repository.NewUserRepository(pool)
-	app := &App{repo: userRepo}
+
+	// Initialize Redis cache
+	redisURL := getEnv("REDIS_URL", "redis://localhost:6379")
+	redisClient := cache.NewRedisClient(redisURL)
+	defer redisClient.Close()
+
+	cachedRepo := cache.NewCachedUserRepository(userRepo, redisClient)
+	app := &App{repo: userRepo, cachedRepo: cachedRepo, redisClient: redisClient}
 
 	// Create Gin router
 	router := gin.Default()
 
-	// Health check endpoint with database check
+	// Health check endpoint with database and Redis check
 	router.GET("/health", func(c *gin.Context) {
+		dbStatus := "connected"
 		if err := db.HealthCheck(ctx, pool); err != nil {
+			dbStatus = "disconnected"
+		}
+
+		redisStatus := "connected"
+		if err := cache.HealthCheck(c.Request.Context(), app.redisClient); err != nil {
+			redisStatus = "disconnected"
+		}
+
+		if dbStatus == "disconnected" {
 			c.JSON(http.StatusServiceUnavailable, gin.H{
 				"status":   "unhealthy",
 				"service":  "user",
-				"database": "disconnected",
-				"error":    err.Error(),
+				"database": dbStatus,
+				"redis":    redisStatus,
 			})
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{
 			"status":   "healthy",
 			"service":  "user",
-			"database": "connected",
+			"database": dbStatus,
+			"redis":    redisStatus,
 		})
 	})
 
@@ -163,7 +185,7 @@ func (app *App) listUsers(c *gin.Context) {
 		limit = 50
 	}
 
-	result, err := app.repo.List(ctx, limit, offset)
+	result, err := app.cachedRepo.List(ctx, limit, offset)
 	if err != nil {
 		log.Printf("Error listing users: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -185,7 +207,7 @@ func (app *App) getUser(c *gin.Context) {
 		return
 	}
 
-	user, err := app.repo.GetByID(ctx, id)
+	user, err := app.cachedRepo.GetByID(ctx, id)
 	if err != nil {
 		if err == repository.ErrUserNotFound {
 			c.JSON(http.StatusNotFound, gin.H{
@@ -225,7 +247,7 @@ func (app *App) createUser(c *gin.Context) {
 		return
 	}
 
-	user, err := app.repo.Create(ctx, &req, string(passwordHash))
+	user, err := app.cachedRepo.Create(ctx, &req, string(passwordHash))
 	if err != nil {
 		if err == repository.ErrUserAlreadyExists {
 			c.JSON(http.StatusConflict, gin.H{
@@ -276,7 +298,7 @@ func (app *App) updateUser(c *gin.Context) {
 		req.Password = &hashedStr
 	}
 
-	user, err := app.repo.Update(ctx, id, &req)
+	user, err := app.cachedRepo.Update(ctx, id, &req)
 	if err != nil {
 		if err == repository.ErrUserNotFound {
 			c.JSON(http.StatusNotFound, gin.H{
@@ -304,7 +326,7 @@ func (app *App) deleteUser(c *gin.Context) {
 		return
 	}
 
-	if err := app.repo.Delete(ctx, id); err != nil {
+	if err := app.cachedRepo.Delete(ctx, id); err != nil {
 		if err == repository.ErrUserNotFound {
 			c.JSON(http.StatusNotFound, gin.H{
 				"error": "User not found",
