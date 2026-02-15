@@ -1,0 +1,19 @@
+# Gradle
+.gradle/
+build/
+app/build/
+
+# Local configuration
+local.properties
+
+# IDE
+.idea/
+*.iml
+
+# APK/AAB files
+*.apk
+*.aap
+*.aab
+
+# Log files
+*.log
