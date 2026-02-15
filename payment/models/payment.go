@@ -12,7 +12,21 @@ const (
 	PaymentTypeBill     = "bill"
 	PaymentTypeMerchant = "merchant"
 	PaymentTypeExternal = "external"
+	PaymentTypeMobile   = "mobile"
 )
+
+// MobileOperator represents a mobile operator with its valid prefixes
+type MobileOperator struct {
+	Name     string   `json:"name"`
+	Prefixes []string `json:"prefixes"`
+}
+
+// MobileOperators defines valid Azerbaijani mobile operators and their prefixes
+var MobileOperators = map[string][]string{
+	"Azercell": {"050", "051"},
+	"Bakcell":  {"055", "099"},
+	"Nar":      {"070", "077"},
+}
 
 // Payment statuses
 const (
@@ -43,7 +57,7 @@ type Payment struct {
 
 type CreatePaymentRequest struct {
 	AccountID        int64           `json:"account_id" binding:"required"`
-	PaymentType      string          `json:"payment_type" binding:"required,oneof=bill merchant external"`
+	PaymentType      string          `json:"payment_type" binding:"required,oneof=bill merchant external mobile"`
 	RecipientName    *string         `json:"recipient_name"`
 	RecipientAccount *string         `json:"recipient_account"`
 	RecipientBank    *string         `json:"recipient_bank"`

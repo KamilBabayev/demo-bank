@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"syscall"
@@ -103,6 +105,7 @@ func main() {
 	api := router.Group("/api/payments")
 	{
 		api.GET("", listPayments)
+		api.GET("/mobile-operators", listMobileOperators)
 		api.GET("/:id", getPayment)
 		api.POST("", createPayment)
 	}
@@ -265,6 +268,42 @@ func createPayment(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "recipient_account required for external transfers"})
 			return
 		}
+	case models.PaymentTypeMobile:
+		if req.RecipientName == nil || *req.RecipientName == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "recipient_name (operator) required for mobile payments"})
+			return
+		}
+		if req.RecipientAccount == nil || *req.RecipientAccount == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "recipient_account (phone number) required for mobile payments"})
+			return
+		}
+		validPrefixes, ok := models.MobileOperators[*req.RecipientName]
+		if !ok {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid mobile operator, must be one of: Azercell, Bakcell, Nar"})
+			return
+		}
+		phone := *req.RecipientAccount
+		if len(phone) != 10 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "phone number must be 10 digits (prefix + 7 digits)"})
+			return
+		}
+		prefix := phone[:3]
+		remaining := phone[3:]
+		prefixValid := false
+		for _, p := range validPrefixes {
+			if p == prefix {
+				prefixValid = true
+				break
+			}
+		}
+		if !prefixValid {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "phone prefix does not match operator " + *req.RecipientName})
+			return
+		}
+		if matched, _ := regexp.MatchString(`^\d{7}$`, remaining); !matched {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "phone number must end with exactly 7 digits"})
+			return
+		}
 	}
 
 	// TODO: Verify user owns the source account by calling account service
@@ -301,4 +340,18 @@ func createPayment(c *gin.Context) {
 		"reference_id": payment.ReferenceID,
 		"status":       payment.Status,
 	})
+}
+
+func listMobileOperators(c *gin.Context) {
+	operators := make([]models.MobileOperator, 0, len(models.MobileOperators))
+	for name, prefixes := range models.MobileOperators {
+		operators = append(operators, models.MobileOperator{
+			Name:     name,
+			Prefixes: prefixes,
+		})
+	}
+	sort.Slice(operators, func(i, j int) bool {
+		return operators[i].Name < operators[j].Name
+	})
+	c.JSON(http.StatusOK, operators)
 }
