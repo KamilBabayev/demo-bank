@@ -1,5 +1,6 @@
 package com.example.demobank
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -36,10 +37,8 @@ class PaymentsFragment : Fragment() {
 
         val newPaymentFab = view.findViewById<FloatingActionButton>(R.id.new_payment_fab)
         newPaymentFab.setOnClickListener {
-            // We will create this activity later
-            // val intent = Intent(activity, NewPaymentActivity::class.java)
-            // startActivity(intent)
-            Toast.makeText(context, "New Payment clicked", Toast.LENGTH_SHORT).show()
+            val intent = Intent(activity, NewPaymentActivity::class.java)
+            startActivity(intent)
         }
 
         return view

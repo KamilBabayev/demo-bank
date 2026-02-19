@@ -66,8 +66,8 @@ data class Payment(
     val id: Long,
     val account_id: Long,
     val amount: Double,
-    val recipient: String,
-    val date: String
+    @SerializedName("recipient_name") val recipient: String,
+    @SerializedName("created_at") val date: String
 ) : Parcelable
 
 @Parcelize
@@ -92,6 +92,15 @@ data class NewTransferRequest(
 ) : Parcelable
 
 @Parcelize
+data class NewPaymentRequest(
+    val recipient: String,
+    val amount: Double,
+    val account_id: Long,
+    val payment_type: String,
+    val recipient_account: String
+) : Parcelable
+
+@Parcelize
 data class Notification(
     val id: Long,
     val user_id: Long,
@@ -110,6 +119,13 @@ data class NotificationMetadata(
     val transfer_id: Long?,
     val reference_id: String?,
     val failure_reason: String?
+) : Parcelable
+
+@Parcelize
+data class MobileOperator(
+    val id: Long,
+    val name: String,
+    val prefixes: List<String>
 ) : Parcelable
 
 interface ApiService {
@@ -133,4 +149,10 @@ interface ApiService {
 
     @GET("/api/v1/notifications")
     fun getNotifications(@Header("Authorization") token: String): Call<NotificationResponse>
+
+    @POST("/api/v1/payments")
+    fun createPayment(@Header("Authorization") token: String, @Body request: NewPaymentRequest): Call<Void>
+
+    @GET("/api/v1/mobile-operators")
+    fun getMobileOperators(@Header("Authorization") token: String): Call<List<MobileOperator>>
 }

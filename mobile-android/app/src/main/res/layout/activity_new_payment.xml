@@ -12,12 +12,12 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
-        app:title="New Payment"
+        app:title="Mobile Top-up"
         app:titleTextColor="@color/text_white"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Spinner
-        android:id="@+id/provider_spinner"
+        android:id="@+id/account_spinner"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
@@ -28,6 +28,41 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <Spinner
+        android:id="@+id/provider_spinner"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/edit_text_background"
+        app:layout_constraintTop_toBottomOf="@id/account_spinner"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/phone_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/provider_spinner"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/phone_number"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/edit_text_background"
+            android:hint="Phone number (e.g. 1234567)"
+            android:inputType="number"
+            android:maxLength="7"
+            android:textColor="@color/text_white"
+            android:textColorHint="@color/text_grey" />
+    </com.google.android.material.textfield.TextInputLayout>
+
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/amount_layout"
         android:layout_width="0dp"
@@ -35,7 +70,7 @@
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
         android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/provider_spinner"
+        app:layout_constraintTop_toBottomOf="@id/phone_layout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 

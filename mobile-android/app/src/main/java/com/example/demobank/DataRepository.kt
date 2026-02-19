@@ -25,4 +25,8 @@ object DataRepository {
     fun getNotifications(token: String): Call<NotificationResponse> {
         return apiService.getNotifications("Bearer $token")
     }
+
+    fun getMobileOperators(token: String): Call<List<MobileOperator>> {
+        return apiService.getMobileOperators("Bearer $token")
+    }
 }
