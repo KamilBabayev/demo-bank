@@ -10,6 +10,9 @@ export default function Cards() {
   const [cards, setCards] = useState<Card[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(0);
+  const pageSize = 10;
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<CreateCardRequest>({
@@ -19,18 +22,19 @@ export default function Cards() {
   });
   const [error, setError] = useState("");
 
-  const fetchData = () => {
+  const fetchData = (offset = 0) => {
     const requests: Promise<unknown>[] = [
-      client.get("/cards").catch(() => ({ data: { cards: [] } })),
+      client.get(`/cards?limit=${pageSize}&offset=${offset}`).catch(() => ({ data: { cards: [], total: 0 } })),
       client.get("/accounts").catch(() => ({ data: { accounts: [] } })),
     ];
     if (isAdmin) {
       requests.push(client.get("/users").catch(() => ({ data: { users: [] } })));
     }
     Promise.all(requests).then((results) => {
-      const cardRes = results[0] as { data: { cards: Card[] } };
+      const cardRes = results[0] as { data: { cards: Card[]; total: number } };
       const acctRes = results[1] as { data: { accounts: Account[] } };
       setCards(cardRes.data.cards ?? []);
+      setTotal(cardRes.data.total ?? 0);
       setAccounts(acctRes.data.accounts ?? []);
       if (isAdmin && results[2]) {
         const userRes = results[2] as { data: { users: User[] } };
@@ -40,7 +44,7 @@ export default function Cards() {
     });
   };
 
-  useEffect(fetchData, [isAdmin]);
+  useEffect(() => fetchData(page * pageSize), [isAdmin, page]);
 
   const accountMap = new Map(accounts.map((a) => [a.id, a]));
   const userMap = new Map(users.map((u) => [u.id, u]));
@@ -178,6 +182,7 @@ export default function Cards() {
       {cards.length === 0 ? (
         <p className="text-sm text-gray-500">No cards found.</p>
       ) : (
+        <>
         <div className="bg-gray-900/80 backdrop-blur-sm border border-gray-700/50 rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-gray-800/50">
@@ -233,6 +238,30 @@ export default function Cards() {
             </tbody>
           </table>
         </div>
+        {total > pageSize && (
+          <div className="flex items-center justify-between mt-4">
+            <span className="text-sm text-gray-400">
+              Showing {page * pageSize + 1}–{Math.min((page + 1) * pageSize, total)} of {total}
+            </span>
+            <div className="flex gap-2">
+              <button
+                disabled={page === 0}
+                onClick={() => setPage(page - 1)}
+                className="px-3 py-1.5 text-sm rounded-lg border border-gray-700/50 text-gray-300 hover:bg-gray-800/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                Previous
+              </button>
+              <button
+                disabled={(page + 1) * pageSize >= total}
+                onClick={() => setPage(page + 1)}
+                className="px-3 py-1.5 text-sm rounded-lg border border-gray-700/50 text-gray-300 hover:bg-gray-800/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
+        </>
       )}
     </div>
   );

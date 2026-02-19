@@ -5,18 +5,14 @@ import type { Account, Payment } from "../types";
 // Predefined payment services
 const paymentServices = {
   internet: [
-    { id: "spectrum", name: "Spectrum Internet", icon: "wifi" },
-    { id: "att", name: "AT&T Internet", icon: "wifi" },
-    { id: "xfinity", name: "Xfinity/Comcast", icon: "wifi" },
-    { id: "verizon-fios", name: "Verizon Fios", icon: "wifi" },
-    { id: "google-fiber", name: "Google Fiber", icon: "wifi" },
+    { id: "azeronline", name: "Azeronline", icon: "wifi" },
+    { id: "citynet", name: "Citynet", icon: "wifi" },
+    { id: "baktelecom", name: "Baktelecom", icon: "wifi" },
   ],
   mobile: [
-    { id: "verizon", name: "Verizon Wireless", icon: "phone" },
-    { id: "tmobile", name: "T-Mobile", icon: "phone" },
-    { id: "att-mobile", name: "AT&T Wireless", icon: "phone" },
-    { id: "sprint", name: "Sprint", icon: "phone" },
-    { id: "mint", name: "Mint Mobile", icon: "phone" },
+    { id: "azercell", name: "Azercell", icon: "phone", prefixes: ["050", "051"] },
+    { id: "bakcell", name: "Bakcell", icon: "phone", prefixes: ["055", "099"] },
+    { id: "nar", name: "Nar", icon: "phone", prefixes: ["070", "077"] },
   ],
 };
 
@@ -31,22 +27,30 @@ export default function Payments() {
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [accountId, setAccountId] = useState("");
   const [amount, setAmount] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [selectedPrefix, setSelectedPrefix] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(0);
+  const pageSize = 10;
 
-  const fetchData = () => {
+  const fetchData = (offset = 0) => {
     Promise.all([
-      client.get("/payments").catch(() => ({ data: { payments: [] } })),
+      client.get(`/payments?limit=${pageSize}&offset=${offset}`).catch(() => ({ data: { payments: [], total: 0 } })),
       client.get("/accounts").catch(() => ({ data: { accounts: [] } })),
     ]).then(([payRes, acctRes]) => {
-      setPayments(payRes.data.payments ?? []);
+      const payData = payRes.data as { payments: Payment[]; total: number };
+      setPayments(payData.payments ?? []);
+      setTotal(payData.total ?? 0);
       const accts = acctRes.data.accounts ?? [];
       setAccounts(accts);
       setLoading(false);
     });
   };
 
-  useEffect(fetchData, []);
+  useEffect(() => fetchData(page * pageSize), [page]);
 
   const handlePay = async (e: FormEvent) => {
     e.preventDefault();
@@ -58,18 +62,31 @@ export default function Payments() {
       return;
     }
 
+    const isMobile = selectedCategory === "mobile";
     const service = [...paymentServices.internet, ...paymentServices.mobile].find(
       (s) => s.id === selectedService
     );
 
+    if (isMobile) {
+      if (!selectedPrefix) {
+        setError("Please select a phone prefix");
+        return;
+      }
+      if (!/^\d{7}$/.test(phoneNumber)) {
+        setError("Phone number must be exactly 7 digits");
+        return;
+      }
+    }
+
     try {
       await client.post("/payments", {
         account_id: Number(accountId),
-        payment_type: "bill",
+        payment_type: isMobile ? "mobile" : "bill",
         recipient_name: service?.name,
+        recipient_account: isMobile ? selectedPrefix + phoneNumber : undefined,
         amount: amount,
         currency: "USD",
-        description: `${selectedCategory === "internet" ? "Internet" : "Mobile"} bill payment`,
+        description: `${isMobile ? "Mobile top-up" : "Internet bill"} payment`,
       });
       setSuccess(`Payment of $${amount} to ${service?.name} initiated successfully!`);
       setShowForm(false);
@@ -77,6 +94,8 @@ export default function Payments() {
       setSelectedService(null);
       setAccountId("");
       setAmount("");
+      setPhoneNumber("");
+      setSelectedPrefix("");
       fetchData();
       setTimeout(() => setSuccess(""), 5000);
     } catch (err: unknown) {
@@ -91,6 +110,8 @@ export default function Payments() {
     setSelectedService(null);
     setAccountId("");
     setAmount("");
+    setPhoneNumber("");
+    setSelectedPrefix("");
     setError("");
   };
 
@@ -154,8 +175,8 @@ export default function Payments() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
                     </svg>
                   </div>
-                  <h4 className="text-white font-medium text-center">Mobile</h4>
-                  <p className="text-gray-500 text-sm text-center mt-1">Pay mobile bills</p>
+                  <h4 className="text-white font-medium text-center">Mobile Top-up</h4>
+                  <p className="text-gray-500 text-sm text-center mt-1">Top up mobile balance</p>
                 </button>
               </div>
             </div>
@@ -174,7 +195,7 @@ export default function Payments() {
                   </svg>
                 </button>
                 <h3 className="text-lg font-semibold text-white">
-                  Select {selectedCategory === "internet" ? "Internet" : "Mobile"} Provider
+                  Select {selectedCategory === "internet" ? "Internet" : "Mobile Top-up"} Provider
                 </h3>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -244,11 +265,44 @@ export default function Payments() {
                       {[...paymentServices.internet, ...paymentServices.mobile].find(s => s.id === selectedService)?.name}
                     </p>
                     <p className="text-gray-500 text-sm">
-                      {selectedCategory === "internet" ? "Internet Service" : "Mobile Service"}
+                      {selectedCategory === "internet" ? "Internet Service" : "Mobile Top-up"}
                     </p>
                   </div>
                 </div>
               </div>
+
+              {selectedCategory === "mobile" && (() => {
+                const operator = paymentServices.mobile.find(s => s.id === selectedService);
+                return operator ? (
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-400 mb-2">
+                      Phone Number
+                    </label>
+                    <div className="flex gap-2">
+                      <select
+                        required
+                        value={selectedPrefix}
+                        onChange={(e) => setSelectedPrefix(e.target.value)}
+                        className="bg-gray-800/50 border border-gray-700 rounded-lg px-3 py-3 text-sm text-white focus:outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20"
+                      >
+                        <option value="">Prefix</option>
+                        {operator.prefixes.map((p) => (
+                          <option key={p} value={p}>{p}</option>
+                        ))}
+                      </select>
+                      <input
+                        type="text"
+                        required
+                        placeholder="1234567"
+                        maxLength={7}
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, "").slice(0, 7))}
+                        className="flex-1 bg-gray-800/50 border border-gray-700 rounded-lg px-3 py-3 text-sm text-white focus:outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20"
+                      />
+                    </div>
+                  </div>
+                ) : null;
+              })()}
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -303,7 +357,48 @@ export default function Payments() {
       {/* Recent Payments */}
       <div>
         <h2 className="text-lg font-semibold text-white mb-4">Payment History</h2>
-        {payments.length === 0 ? (
+        {selectedPayment ? (
+          <div className="bg-gray-900/80 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6">
+            <button
+              onClick={() => setSelectedPayment(null)}
+              className="flex items-center gap-2 text-amber-500 hover:text-amber-400 mb-6 text-sm font-medium"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back to List
+            </button>
+
+            <div className="space-y-4">
+              <DetailRow label="Reference ID" value={selectedPayment.reference_id} mono />
+              <DetailRow label="Payment Type" value={selectedPayment.payment_type} />
+              <DetailRow label="Recipient Name" value={selectedPayment.recipient_name ?? "-"} />
+              {selectedPayment.recipient_account && (
+                <DetailRow label="Recipient Account" value={selectedPayment.recipient_account} />
+              )}
+              <div className="flex justify-between items-center py-2 border-b border-gray-700/50">
+                <span className="text-gray-400 text-sm">Amount</span>
+                <span className="text-white font-medium">{selectedPayment.currency} {selectedPayment.amount}</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-gray-700/50">
+                <span className="text-gray-400 text-sm">Status</span>
+                <StatusBadge status={selectedPayment.status} />
+              </div>
+              <DetailRow label="Description" value={selectedPayment.description ?? "-"} />
+              {selectedPayment.status === "failed" && selectedPayment.failure_reason && (
+                <div className="flex justify-between items-center py-2 border-b border-gray-700/50">
+                  <span className="text-gray-400 text-sm">Failure Reason</span>
+                  <span className="text-red-400 text-sm">{selectedPayment.failure_reason}</span>
+                </div>
+              )}
+              <DetailRow label="Created" value={new Date(selectedPayment.created_at).toLocaleString()} />
+              <DetailRow label="Updated" value={new Date(selectedPayment.updated_at).toLocaleString()} />
+              {selectedPayment.processed_at && (
+                <DetailRow label="Processed" value={new Date(selectedPayment.processed_at).toLocaleString()} />
+              )}
+            </div>
+          </div>
+        ) : payments.length === 0 ? (
           <div className="bg-gray-900/80 backdrop-blur-sm border border-gray-700/50 rounded-xl p-8 text-center">
             <svg className="w-12 h-12 text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -311,40 +406,78 @@ export default function Payments() {
             <p className="text-gray-500">No payments yet.</p>
           </div>
         ) : (
-          <div className="bg-gray-900/80 backdrop-blur-sm border border-gray-700/50 rounded-xl overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-800/50">
-                <tr>
-                  <th className="text-left px-4 py-3 text-gray-400 font-medium">Reference</th>
-                  <th className="text-left px-4 py-3 text-gray-400 font-medium">Recipient</th>
-                  <th className="text-left px-4 py-3 text-gray-400 font-medium">Amount</th>
-                  <th className="text-left px-4 py-3 text-gray-400 font-medium">Status</th>
-                  <th className="text-left px-4 py-3 text-gray-400 font-medium">Date</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-700/50">
-                {payments.map((p) => (
-                  <tr key={p.id} className="hover:bg-gray-800/30">
-                    <td className="px-4 py-3 font-mono text-xs text-gray-300">
-                      {p.reference_id.slice(0, 8)}...
-                    </td>
-                    <td className="px-4 py-3 text-gray-300">{p.recipient_name ?? "-"}</td>
-                    <td className="px-4 py-3 text-white font-medium">
-                      {p.currency} {p.amount}
-                    </td>
-                    <td className="px-4 py-3">
-                      <StatusBadge status={p.status} />
-                    </td>
-                    <td className="px-4 py-3 text-gray-400">
-                      {new Date(p.created_at).toLocaleString()}
-                    </td>
+          <>
+            <div className="bg-gray-900/80 backdrop-blur-sm border border-gray-700/50 rounded-xl overflow-hidden">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-800/50">
+                  <tr>
+                    <th className="text-left px-4 py-3 text-gray-400 font-medium">Reference</th>
+                    <th className="text-left px-4 py-3 text-gray-400 font-medium">Recipient</th>
+                    <th className="text-left px-4 py-3 text-gray-400 font-medium">Amount</th>
+                    <th className="text-left px-4 py-3 text-gray-400 font-medium">Status</th>
+                    <th className="text-left px-4 py-3 text-gray-400 font-medium">Date</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-gray-700/50">
+                  {payments.map((p) => (
+                    <tr
+                      key={p.id}
+                      className="hover:bg-gray-800/30 cursor-pointer"
+                      onClick={() => setSelectedPayment(p)}
+                    >
+                      <td className="px-4 py-3 font-mono text-xs text-gray-300">
+                        {p.reference_id.slice(0, 8)}...
+                      </td>
+                      <td className="px-4 py-3 text-gray-300">{p.recipient_name ?? "-"}</td>
+                      <td className="px-4 py-3 text-white font-medium">
+                        {p.currency} {p.amount}
+                      </td>
+                      <td className="px-4 py-3">
+                        <StatusBadge status={p.status} />
+                      </td>
+                      <td className="px-4 py-3 text-gray-400">
+                        {new Date(p.created_at).toLocaleString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {total > pageSize && (
+              <div className="flex items-center justify-between mt-4">
+                <span className="text-sm text-gray-400">
+                  Showing {page * pageSize + 1}–{Math.min((page + 1) * pageSize, total)} of {total}
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    disabled={page === 0}
+                    onClick={() => setPage(page - 1)}
+                    className="px-3 py-1.5 text-sm rounded-lg border border-gray-700/50 text-gray-300 hover:bg-gray-800/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    disabled={(page + 1) * pageSize >= total}
+                    onClick={() => setPage(page + 1)}
+                    className="px-3 py-1.5 text-sm rounded-lg border border-gray-700/50 text-gray-300 hover:bg-gray-800/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
+    </div>
+  );
+}
+
+function DetailRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+  return (
+    <div className="flex justify-between items-center py-2 border-b border-gray-700/50">
+      <span className="text-gray-400 text-sm">{label}</span>
+      <span className={`text-white text-sm ${mono ? "font-mono text-xs" : ""}`}>{value}</span>
     </div>
   );
 }

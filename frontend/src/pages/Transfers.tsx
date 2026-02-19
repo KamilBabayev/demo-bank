@@ -9,6 +9,9 @@ export default function Transfers() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [allAccounts, setAllAccounts] = useState<Account[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(0);
+  const pageSize = 10;
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [fromAccountId, setFromAccountId] = useState("");
@@ -16,19 +19,20 @@ export default function Transfers() {
   const [amount, setAmount] = useState("");
   const [error, setError] = useState("");
 
-  const fetchData = () => {
+  const fetchData = (offset = 0) => {
     Promise.all([
-      client.get("/transfers").catch(() => ({ data: { transfers: [] } })),
+      client.get(`/transfers?limit=${pageSize}&offset=${offset}`).catch(() => ({ data: { transfers: [], total: 0 } })),
       client.get("/accounts").catch(() => ({ data: { accounts: [] } })),
       client.get("/accounts/directory").catch(() => ({ data: { accounts: [] } })),
       client.get("/users").catch(() => ({ data: { users: [] } })),
     ])
       .then(([txRes, acctRes, dirRes, userRes]) => {
-        const txData = txRes?.data as { transfers?: Transfer[] } | undefined;
+        const txData = txRes?.data as { transfers?: Transfer[]; total?: number } | undefined;
         const acctData = acctRes?.data as { accounts?: Account[] } | undefined;
         const dirData = dirRes?.data as { accounts?: Account[] } | undefined;
         const userData = userRes?.data as { users?: User[] } | undefined;
         setTransfers(txData?.transfers ?? []);
+        setTotal(txData?.total ?? 0);
         setAccounts(acctData?.accounts ?? []);
         setAllAccounts(dirData?.accounts ?? []);
         setUsers(userData?.users ?? []);
@@ -40,7 +44,7 @@ export default function Transfers() {
       });
   };
 
-  useEffect(fetchData, []);
+  useEffect(() => fetchData(page * pageSize), [page]);
 
   const handleCreate = async (e: FormEvent) => {
     e.preventDefault();
@@ -167,48 +171,73 @@ export default function Transfers() {
       {transfers.length === 0 ? (
         <p className="text-sm text-gray-500">No transfers found.</p>
       ) : (
-        <div className="bg-gray-900/80 backdrop-blur-sm border border-gray-700/50 rounded-xl overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-800/50">
-              <tr>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">Reference</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">From</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">To</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">Amount</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">Status</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">Date</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-700/50">
-              {transfers.map((t) => {
-                const fromAcct = accountMap.get(t.from_account_id);
-                const toAcct = accountMap.get(t.to_account_id);
-                return (
-                  <tr key={t.id} className="hover:bg-gray-800/30">
-                    <td className="px-4 py-3 font-mono text-xs text-gray-300">
-                      {t.reference_id.slice(0, 8)}...
-                    </td>
-                    <td className="px-4 py-3 text-gray-300">
-                      {fromAcct ? fromAcct.account_number : t.from_account_id}
-                    </td>
-                    <td className="px-4 py-3 text-gray-300">
-                      {toAcct ? toAcct.account_number : t.to_account_id}
-                    </td>
-                    <td className="px-4 py-3 text-white font-medium">
-                      {t.currency} {t.amount}
-                    </td>
-                    <td className="px-4 py-3">
-                      <StatusBadge status={t.status} />
-                    </td>
-                    <td className="px-4 py-3 text-gray-400">
-                      {new Date(t.created_at).toLocaleString()}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <>
+          <div className="bg-gray-900/80 backdrop-blur-sm border border-gray-700/50 rounded-xl overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-800/50">
+                <tr>
+                  <th className="text-left px-4 py-3 text-gray-400 font-medium">Reference</th>
+                  <th className="text-left px-4 py-3 text-gray-400 font-medium">From</th>
+                  <th className="text-left px-4 py-3 text-gray-400 font-medium">To</th>
+                  <th className="text-left px-4 py-3 text-gray-400 font-medium">Amount</th>
+                  <th className="text-left px-4 py-3 text-gray-400 font-medium">Status</th>
+                  <th className="text-left px-4 py-3 text-gray-400 font-medium">Date</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-700/50">
+                {transfers.map((t) => {
+                  const fromAcct = accountMap.get(t.from_account_id);
+                  const toAcct = accountMap.get(t.to_account_id);
+                  return (
+                    <tr key={t.id} className="hover:bg-gray-800/30">
+                      <td className="px-4 py-3 font-mono text-xs text-gray-300">
+                        {t.reference_id.slice(0, 8)}...
+                      </td>
+                      <td className="px-4 py-3 text-gray-300">
+                        {fromAcct ? fromAcct.account_number : t.from_account_id}
+                      </td>
+                      <td className="px-4 py-3 text-gray-300">
+                        {toAcct ? toAcct.account_number : t.to_account_id}
+                      </td>
+                      <td className="px-4 py-3 text-white font-medium">
+                        {t.currency} {t.amount}
+                      </td>
+                      <td className="px-4 py-3">
+                        <StatusBadge status={t.status} />
+                      </td>
+                      <td className="px-4 py-3 text-gray-400">
+                        {new Date(t.created_at).toLocaleString()}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          {total > pageSize && (
+            <div className="flex items-center justify-between mt-4">
+              <span className="text-sm text-gray-400">
+                Showing {page * pageSize + 1}–{Math.min((page + 1) * pageSize, total)} of {total}
+              </span>
+              <div className="flex gap-2">
+                <button
+                  disabled={page === 0}
+                  onClick={() => setPage(page - 1)}
+                  className="px-3 py-1.5 text-sm rounded-lg border border-gray-700/50 text-gray-300 hover:bg-gray-800/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  Previous
+                </button>
+                <button
+                  disabled={(page + 1) * pageSize >= total}
+                  onClick={() => setPage(page + 1)}
+                  className="px-3 py-1.5 text-sm rounded-lg border border-gray-700/50 text-gray-300 hover:bg-gray-800/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
